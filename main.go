@@ -273,10 +273,12 @@ func GenerateClientFromProgramIDL(idl IDL) ([]*FileWrapper, error) {
 		}
 	}
 
+	defs := make(map[string]IdlTypeDef)
 	{
 		file := NewGoFile(idl.Name, true)
 		// Declare types from IDL:
 		for _, typ := range idl.Types {
+			defs[typ.Name] = typ
 			file.Add(genTypeDef(&idl, false, typ))
 		}
 		files = append(files, &FileWrapper{
@@ -289,8 +291,18 @@ func GenerateClientFromProgramIDL(idl IDL) ([]*FileWrapper, error) {
 		file := NewGoFile(idl.Name, true)
 		// Declare account layouts from IDL:
 		for _, acc := range idl.Accounts {
-			// generate type definition:
-			file.Add(genTypeDef(&idl, GetConfig().TypeID == TypeIDAnchor, acc))
+			if acc.Type.Kind != "" {
+				file.Add(genTypeDef(&idl, GetConfig().TypeID == TypeIDAnchor, acc))
+			} else {
+				if typ, ok := defs[acc.Name]; ok {
+					file.Add(genTypeDef(&idl, GetConfig().TypeID == TypeIDAnchor, IdlTypeDef{
+						Name: typ.Name,
+						Type: typ.Type,
+					}))
+				} else {
+					panic(`not implemented - only IDL from ("anchor": ">=0.30.0") is available`)
+				}
+			}
 		}
 		files = append(files, &FileWrapper{
 			Name: "accounts",

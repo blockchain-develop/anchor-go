@@ -296,7 +296,7 @@ func GenerateClientFromProgramIDL(idl IDL) ([]*FileWrapper, error) {
 			} else {
 				if typ, ok := defs[acc.Name]; ok {
 					file.Add(genTypeDef(&idl, GetConfig().TypeID == TypeIDAnchor, IdlTypeDef{
-						Name: typ.Name,
+						Name: typ.Name + "Account",
 						Type: typ.Type,
 					}))
 				} else {
